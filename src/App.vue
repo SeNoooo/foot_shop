@@ -1,0 +1,25 @@
+<template>
+  <div id="app">
+      <!-- 路由组件  上面的组件是变化的-->
+      <router-view></router-view>
+      <!-- 底部组件是不变的 -->
+      <!-- $route 代表当前路由 只有当meta对象中showFooter的值为true时-->
+      <FooterGuide v-show="$route.meta.showFooter"></FooterGuide>
+  </div>
+</template>
+
+<script>
+    import FooterGuide from './components/FooterGuide/FooterGuide.vue'
+    export default {
+        components:{
+            FooterGuide
+        }
+    }
+</script>
+
+<style lang="stylus" rel="stylesheet/stylus">
+#app
+    width 100%
+    height 100%
+    background #f5f5f5
+</style>
