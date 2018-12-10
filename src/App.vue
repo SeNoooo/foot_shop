@@ -16,6 +16,7 @@
             //this.$store.dispatch('getAddress')
             // 使用getAddress()方法 发起异步请求
             this.getAddress()
+            this.getUserInfo()
         },
         
         components:{
@@ -23,7 +24,8 @@
         },
         methods:{
             // 获取getAddress方法
-            ...mapActions(["getAddress"])
+            ...mapActions(["getAddress","getUserInfo"])
+
         }
     }
 </script>
