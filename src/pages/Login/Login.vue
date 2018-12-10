@@ -47,8 +47,9 @@
                   </div>
                 </section>
                 <section class="login_message">
-                  <input type="text" maxlength="11" placeholder="验证码">
-                  <img class="get_verification" src="./images/captcha.svg" alt="captcha">
+                  <input type="text" maxlength="11" placeholder="验证码" v-model="captcha">
+                  <!-- 发送远程路径访问返回验证码 -->
+                  <img class="get_verification" src="http://localhost:4000/captcha" alt="captcha" @click="getCaptcha" ref="captcha">
                 </section>
               </section>
             </div>
@@ -61,9 +62,12 @@
           <i class="iconfont icon-jiantou2"></i>
         </a>
       </div>
+      <AlertTip :alertText="alertText" v-show="alertShow" @closeTip="closeTip"></AlertTip>
     </div>
 </template>
 <script>
+import AlertTip from '../../components/AlertTip/AlertTip.vue'
+import {reqSendCode,reqSmsLogin,reqPwdLogin, reqUserInfo} from '../../api'
 export default {
   data(){
     return {
@@ -75,7 +79,9 @@ export default {
       name:'',          //用户名
       pwd:'',          //密码
       captcha:'',        //图像验证码
-      
+      alertText:'',      //提示文本
+      alertShow:false    //是否显示提示框
+
     }
   },
 
@@ -87,25 +93,110 @@ export default {
   },
 
   methods:{
-    // 异步过去短信验证码
-    getCode(){
-      if(this.computeTime==0){
+    // 异步获取短信验证码
+    async getCode(){
+      if(!this.computeTime){
         // 启动倒计时
         this.computeTime=30
-        const intervalId=setInterval(()=>{
+        this.intervalId=setInterval(()=>{
           this.computeTime--
           if(this.computeTime<=0){
-            clearInterval(intervalId)
+            clearInterval(this.intervalId)
           }
         },1000)
 
          // 发送ajax请求（向指定手机号发送验证码短信）
+         const result=await reqSendCode(this.phone)
+         //  失败了
+         console.log(result.code);
+         if(result.code===1){
+          // 显示提示   
+          this.showAlert(result.msg)
+          // 停止倒计时
+          if(this.computeTime){
+            this.computeTime=0
+            clearInterval(this.intervalId)
+            this.intervalId=undefined
+          }
+         }
       }
     },
+    showAlert(alertText){
+      this.alertShow=true
+      this.alertText=alertText
+    },
+    closeTip(){
+      this.alertShow=false
+      this.alertText=''
+    },
+    // 获取一个新的图片验证码
+    getCaptcha(){
+      // 怎么让他重新访问一次？路径不同才能重新访问
+      // 并且这不是ajax请求 所以不存在跨域问题
+      // this.$refs.captcha 是找到ref属性为captcha的元素
+      this.$refs.captcha.src='http://localhost:4000/captcha?time='+Date.now()
+    },
     // 异步登录
-    login(){
+    async login(){
+      let result
       // 前台表单验证
+      // 先判断是哪种登录方式
+      if(this.loginWay){
+        // ---------短信登录-------//
+        const {rightphone,phone,code} = this
+        if(!this.rightPhone){
+          // 如果手机号格式不正确
+          this.showAlert('手机号不正确')
+          return
+        }else if(!/^\d{6}$/.test(code)){
+          // 如果短信验证码格式不正确
+          this.showAlert('验证码必须是六位数字')
+          return
+        }
+        result=await reqSmsLogin(phone,code)
+      }else{
+        // ----------密码登录---------// 
+        const {name,pwd,captcha}=this
+        if(!this.name){
+          // 如果用户名没有
+          this.showAlert('用户名不正确')
+          return
+        }else if(!this.pwd){
+          // 如果密码没有
+          this.showAlert('密码不正确')
+          return
+        }else if(!this.captcha){
+          // 如果验证码没有
+          this.showAlert('验证码不正确')
+          return
+        }
+        // 发送ajax请求密码登录
+        result=await reqPwdLogin({name,pwd,captcha})
+      }
+      //取消验证码倒计时
+      if(this.computeTime){
+        this.computeTime=0
+        clearInterval(this.intervalId)
+        this.intervalId=undefined
+      }
+      // 根据结果数据处理
+      if(result.code==0){
+          const user=result.data
+          //将user保存到vuex的state中
+          this.$store.dispatch('recordUser',user)
+          //去个人中心界面
+          this.$router.replace('/profile')
+      }else{
+          const msg=result.msg
+          this.showAlert(msg)
+          // 如果登录失败则更换验证码
+          this.getCaptcha()
+        }
     }
+  },
+
+  components:{
+    AlertTip
   }
 }
 </script>

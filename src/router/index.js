@@ -49,10 +49,10 @@ export default new VueRouter({
             path:'/login',
             component:Login
         },
-        // 默认显示msite
-        // {
-        //     path:'/',
-        //     redirect:'/msite'
-        // },
+        //默认显示msite
+        {
+            path:'/',
+            redirect:'/msite'
+        },
     ]
 })
