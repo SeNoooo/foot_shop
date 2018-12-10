@@ -50,9 +50,9 @@ export default new VueRouter({
             component:Login
         },
         // 默认显示msite
-        {
-            path:'/',
-            redirect:'/msite'
-        },
+        // {
+        //     path:'/',
+        //     redirect:'/msite'
+        // },
     ]
 })

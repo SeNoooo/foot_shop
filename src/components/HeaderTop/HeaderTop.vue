@@ -10,10 +10,12 @@
     </header>
 </template>
 <script>
+
 export default {
   props:{
       title:''
-  }
+  },
+  
 }
 </script>
 <style lang="stylus" rel="stylesheet/stylus">

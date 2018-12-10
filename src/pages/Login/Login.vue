@@ -4,16 +4,20 @@
         <div class="login_header">
           <h2 class="login_logo">硅谷外卖</h2>
           <div class="login_header_title">
-            <a href="javascript:;" class="on">短信登录</a>
-            <a href="javascript:;">密码登录</a>
+            <!-- 如果是true 显示短信登录  如果是false 显示密码登录 -->
+            <!-- 点击时短信登录时 loginWay值为true 则短信登录显示 -->
+            <a href="javascript:;" :class="{on:loginWay}" @click="loginWay=true">短信登录</a>
+            <a href="javascript:;" :class="{on:!loginWay}" @click="loginWay=false">密码登录</a>
           </div>
         </div>
         <div class="login_content">
           <form>
-            <div class="on">
+            <!-- 如果是true 显示短信登录  如果是false 显示密码登录 -->
+            <div :class="{on:loginWay}">
               <section class="login_message">
-                <input type="tel" maxlength="11" placeholder="手机号">
-                <button disabled="disabled" class="get_verification">获取验证码</button>
+                <input type="tel" maxlength="11" placeholder="手机号" v-model="phone">
+                <!-- rightPhone可以根据phone确定，所以是计算属性 right_phone是一个class名-->
+                <button :disabled="!rightPhone" class="get_verification" :class="{right_phone:rightPhone}" @click="getCode">获取验证码</button>
               </section>
               <section class="login_verification">
                 <input type="tel" maxlength="8" placeholder="验证码">
@@ -23,7 +27,7 @@
                 <a href="javascript:;">《用户服务协议》</a>
               </section>
             </div>
-            <div>
+            <div :class="{on:!loginWay}">
               <section>
                 <section class="login_message">
                   <input type="tel" maxlength="11" placeholder="手机/邮箱/用户名">
@@ -54,7 +58,27 @@
 </template>
 <script>
 export default {
-  
+  data(){
+    return {
+      loginWay:true,  //true代表短信登录，false代表密码登录
+      phone:''          //手机号码
+    }
+  },
+
+  computed:{
+    rightPhone(){
+      // 如果匹配就是true
+      return /^1\d{10}$/.test(this.phone)
+    }
+  },
+
+  methods:{
+    getCode(){
+      // 启动倒计时
+      alert(123)
+      // 发送ajax请求（向指定手机号发送验证码短信）
+    }
+  }
 }
 </script>
 <style lang="stylus" rel="stylesheet/stylus">
@@ -118,6 +142,8 @@ export default {
                   color #ccc
                   font-size 14px
                   background transparent
+                  &.right_phone 
+                    color black
               .login_verification
                 position relative
                 margin-top 16px

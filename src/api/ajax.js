@@ -2,6 +2,7 @@
 // 返回promise对象（异步返回的数据是：resoponse.data）
 // 下载引入axios
 import axios from 'axios'
+
 export default function ajax(url = '', data = {}, type = 'GET') {
     // 接收函数的函数---高阶函数
     return new Promise(function (resolve, reject) {

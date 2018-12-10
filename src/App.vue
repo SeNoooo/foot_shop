@@ -10,9 +10,20 @@
 
 <script>
     import FooterGuide from './components/FooterGuide/FooterGuide.vue'
+    import {mapActions} from 'vuex'
     export default {
+        mounted(){
+            //this.$store.dispatch('getAddress')
+            // 使用getAddress()方法 发起异步请求
+            this.getAddress()
+        },
+        
         components:{
             FooterGuide
+        },
+        methods:{
+            // 获取getAddress方法
+            ...mapActions(["getAddress"])
         }
     }
 </script>
