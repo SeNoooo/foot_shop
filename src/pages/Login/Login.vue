@@ -11,16 +11,18 @@
           </div>
         </div>
         <div class="login_content">
-          <form>
+          <form @submit.prevent="login">
             <!-- 如果是true 显示短信登录  如果是false 显示密码登录 -->
             <div :class="{on:loginWay}">
               <section class="login_message">
                 <input type="tel" maxlength="11" placeholder="手机号" v-model="phone">
                 <!-- rightPhone可以根据phone确定，所以是计算属性 right_phone是一个class名-->
-                <button :disabled="!rightPhone" class="get_verification" :class="{right_phone:rightPhone}" @click="getCode">获取验证码</button>
+                <!-- @click.prevent 取消默认提交 -->
+                <!-- 三目运算符判断显示什么 -->
+                <button :disabled="!rightPhone" class="get_verification" :class="{right_phone:rightPhone}" @click.prevent="getCode">{{computeTime>0 ? `已发送(${computeTime})秒`:"获取验证码"}}</button>
               </section>
               <section class="login_verification">
-                <input type="tel" maxlength="8" placeholder="验证码">
+                <input type="tel" maxlength="8" placeholder="验证码" v-model="code">
               </section>
               <section class="login_hint">
                 温馨提示：未注册硅谷外卖帐号的手机号，登录时将自动注册，且代表已同意
@@ -30,13 +32,18 @@
             <div :class="{on:!loginWay}">
               <section>
                 <section class="login_message">
-                  <input type="tel" maxlength="11" placeholder="手机/邮箱/用户名">
+                  <input type="text" maxlength="11" placeholder="手机/邮箱/用户名" v-model="name">
                 </section>
                 <section class="login_verification">
-                  <input type="tel" maxlength="8" placeholder="密码">
-                  <div class="switch_button off">
-                    <div class="switch_circle"></div>
-                    <span class="switch_text">...</span>
+                  <!-- 实现密码的显示和隐藏 -->
+                  <!-- 默认showPwd为false 不显示密码 -->
+                  <!-- 双向绑定pwd输入框密码 -->
+                  <input type="password" maxlength="8" placeholder="密码" v-if="!showPwd" v-model="pwd">
+                  <input type="text" maxlength="8" placeholder="密码" v-else v-model="pwd">
+                  <!-- 点击小滑块时 让showPwd的值取反 -->
+                  <div class="switch_button" @click="showPwd=!showPwd" :class="showPwd?'on':'off'">
+                    <div class="switch_circle" :class="{right:showPwd}"></div>
+                    <span class="switch_text">{{showPwd?'abc':'...'}}</span>
                   </div>
                 </section>
                 <section class="login_message">
@@ -61,7 +68,14 @@ export default {
   data(){
     return {
       loginWay:true,  //true代表短信登录，false代表密码登录
-      phone:''          //手机号码
+      computeTime:0,       //计时时间
+      showPwd:false,      //是否显示密码
+      phone:'',         //手机号码
+      code:'',         //短信验证码
+      name:'',          //用户名
+      pwd:'',          //密码
+      captcha:'',        //图像验证码
+      
     }
   },
 
@@ -73,10 +87,24 @@ export default {
   },
 
   methods:{
+    // 异步过去短信验证码
     getCode(){
-      // 启动倒计时
-      alert(123)
-      // 发送ajax请求（向指定手机号发送验证码短信）
+      if(this.computeTime==0){
+        // 启动倒计时
+        this.computeTime=30
+        const intervalId=setInterval(()=>{
+          this.computeTime--
+          if(this.computeTime<=0){
+            clearInterval(intervalId)
+          }
+        },1000)
+
+         // 发送ajax请求（向指定手机号发送验证码短信）
+      }
+    },
+    // 异步登录
+    login(){
+      // 前台表单验证
     }
   }
 }
@@ -183,6 +211,8 @@ export default {
                     background #fff
                     box-shadow 0 2px 4px 0 rgba(0,0,0,.1)
                     transition transform .3s
+                    &.right
+                      transform  translateX(30px)
               .login_hint
                 margin-top 12px
                 color #999
