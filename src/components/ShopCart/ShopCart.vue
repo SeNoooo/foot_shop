@@ -22,7 +22,7 @@
         <div class="shopcart-list" v-show="listShow">
             <div class="list-header">
                 <h1 class="title">购物车</h1>
-                <span class="empty">清空</span>
+                <span class="empty" @click="clearCart">清空</span>
             </div>
             <div class="list-content">
                 <ul>
@@ -44,6 +44,7 @@
   </div>
 </template>
 <script>
+  import { MessageBox} from 'mint-ui'
   import {mapState,mapGetters} from 'vuex'
   import BScroll from 'better-scroll'
   import CartControl from '../CartControl/CartControl.vue'
@@ -105,6 +106,16 @@
             // 只有当总数量大于0时才切换
             if(this.totalCount>0)
             this.isShow=!this.isShow
+        },
+        clearCart(){
+            MessageBox.confirm('确定晴空购物车？').then(
+                action=>{
+                this.$store.dispatch('clearCart')
+                },
+                action=>{
+                    
+                }
+            )
         }
     }
   }
